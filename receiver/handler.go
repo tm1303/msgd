@@ -2,12 +2,13 @@ package receiver
 
 import (
 	"encoding/json"
+	"msgd/infra"
 	"net/http"
 )
 
 type EnqueueRequest struct {
 	Message string `json:"message"`
-	UserID string `json:"user_id"`
+	// UserID string `json:"user_id"`
 }
 
 type EnqueueResponse struct {
@@ -25,12 +26,17 @@ func GetHandler(msgQueuer MsgQueuer) func(w http.ResponseWriter, r *http.Request
 		err := json.NewDecoder(r.Body).Decode(&p)
 
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
 			http.Error(w, "invalid request payload", http.StatusBadRequest)
 			return
 		}
 
-		id, err := msgQueuer.Enqueue(p.Message, p.UserID)
+		userID, ok := infra.UserIDFrom(r.Context())
+		if !ok{
+			http.Error(w, "missing userid", http.StatusBadRequest)
+			return
+		}
+
+		id, err := msgQueuer.Enqueue(p.Message, userID)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError) // log
 			return

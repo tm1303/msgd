@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"msgd/infra"
 	"msgd/processor"
 	"msgd/receiver"
 	"net/http"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -47,6 +49,9 @@ func main() {
 	msgClient := receiver.NewSqsQueuer(awsSession, defaultConfig.queueName)
 
 	r := chi.NewRouter()
+	r.Use(middleware.Logger)
+	r.Use(infra.UserIDMiddleware)
+
 	r.Get("/health", health)
 	r.Post("/enqueue", receiver.GetHandler(msgClient))
 
