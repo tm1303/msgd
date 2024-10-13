@@ -28,6 +28,7 @@ func (r sqsQueuer) Enqueue(messageBody string, userID string) (*string, error) {
 	body := domain.MessageBody{
         Message: messageBody,
         Date:   time.Now(),
+		UserID: userID,
     }
 
     bodyJSON, err := json.Marshal(body)

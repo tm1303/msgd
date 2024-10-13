@@ -8,4 +8,7 @@ require (
 	github.com/go-chi/chi/v5 v5.1.0
 )
 
-require github.com/jmespath/go-jmespath v0.4.0 // indirect
+require (
+	github.com/gorilla/websocket v1.5.3
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
+)

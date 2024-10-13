@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"msgd/broadcaster"
+	"msgd/domain"
 	"msgd/infra"
 	"msgd/processor"
 	"msgd/receiver"
@@ -43,8 +45,10 @@ func main() {
 		Region: aws.String(defaultConfig.awsRegion),
 	}))
 
+	broadcastChan := make(chan domain.MessageBody)
 	msgPoller := processor.NewSqsPoller(awsSession, defaultConfig.queueName, defaultConfig.pollSize)
-	go processor.StartProcessor(ctx, msgPoller)
+	go broadcaster.StartBroadcaster(ctx, broadcastChan)
+	go processor.StartProcessor(ctx, msgPoller, broadcastChan)
 
 	msgClient := receiver.NewSqsQueuer(awsSession, defaultConfig.queueName)
 
@@ -54,6 +58,7 @@ func main() {
 
 	r.Get("/health", health)
 	r.Post("/enqueue", receiver.GetHandler(msgClient))
+	r.Get("/ws", broadcaster.WsHandler)
 
 	srv := http.Server{
 		Addr:    defaultConfig.httpPort,
