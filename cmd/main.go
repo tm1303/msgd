@@ -31,14 +31,14 @@ var defaultConfig = config{
 }
 
 func health(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("All good\n"))
+	w.Write([]byte("All good\n")) //nolint:errcheck
 }
 
 func main() {
 	ctx := context.Background()
 
 	awsSession := session.Must(session.NewSession(&aws.Config{
-		Region: aws.String(defaultConfig.awsRegion), // Replace with your desired region
+		Region: aws.String(defaultConfig.awsRegion),
 	}))
 
 	msgPoller := processor.NewSqsPoller(awsSession, defaultConfig.queueName, defaultConfig.pollSize)

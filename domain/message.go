@@ -8,5 +8,4 @@ type MessageBody struct {
     Date    time.Time `json:"date"`
 }
 
-
 const UserIDAttributeName string = "UserID"

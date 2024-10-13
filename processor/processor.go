@@ -33,7 +33,7 @@ func pollMessages(ctx context.Context, poller MsgPoller) error {
 	count := poller.poll(ctx, processMessage, []string{domain.UserIDAttributeName})
 	fmt.Printf("%d messages processed\n", count)
 
-	return nil // Return nil for successful processing; add error handling if needed
+	return nil
 }
 
 func processMessage(body *string, attributes map[string]interface{}) bool {

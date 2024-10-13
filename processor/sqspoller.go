@@ -67,7 +67,7 @@ func convertMessageAttributes(attrs map[string]*sqs.MessageAttributeValue) map[s
         case "String":
             result[key] = *attr.StringValue
         case "Number":
-            result[key] = *attr.StringValue // SQS represents numbers as strings
+            result[key] = *attr.StringValue // bit annoying :/
         case "Binary":
             result[key] = attr.BinaryValue
         default:
