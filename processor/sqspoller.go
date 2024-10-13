@@ -1,8 +1,8 @@
 package processor
 
 import (
+	"context"
 	"fmt"
-	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -23,7 +23,7 @@ func NewSqsPoller(awsSession *session.Session, queue string, batchSize int64) Ms
 	}
 }
 
-func (r sqsPoller) Poll() *string {
+func (r sqsPoller) Poll(ctx context.Context, action func(message *string) bool) int64 {
 
 	pollParams := &sqs.ReceiveMessageInput{
 		MaxNumberOfMessages: r.batchSize,
@@ -32,10 +32,28 @@ func (r sqsPoller) Poll() *string {
 
 	result, err := r.sqs.ReceiveMessage(pollParams)
 	if err != nil {
-		fmt.Printf("Failed to receive message: %s\n", err)
-		os.Exit(1) // TODO
+		panic(fmt.Errorf("failed to read message queue: %w", err)) 
 	}
 
-	fmt.Printf("Message sent successfully, Message[0]: %s\n", *result.Messages[0].Body)
-	return result.Messages[0].ReceiptHandle
+	if len(result.Messages) == 0 {
+		return 0
+	}
+
+	msgCount := int64(0)
+	for _, v := range result.Messages {
+		b := v.Body
+		if action(b) { // if the message has been procssed delete it from the queue
+			deleteParams := &sqs.DeleteMessageInput{
+				QueueUrl:      r.queue,
+				ReceiptHandle: v.ReceiptHandle,
+			}
+			_, err = r.sqs.DeleteMessage(deleteParams)
+			if err != nil {
+				panic(fmt.Errorf("failed to delete from queue: %w", err)) // unknown state
+			}
+			msgCount++
+		}
+	}
+
+	return int64(msgCount)
 }

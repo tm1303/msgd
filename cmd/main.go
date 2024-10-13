@@ -27,23 +27,24 @@ var defaultConfig = config{
 	httpPort:  ":8080",
 	queueName: "https://sqs.eu-west-2.amazonaws.com/205962165374/MSGC-DEV-1",
 	awsRegion: "eu-west-2",
-	pollSize:  1,
+	pollSize:  10,
 }
 
 func health(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("All good\n"))
 }
 
 func main() {
+	ctx := context.Background()
+
 	awsSession := session.Must(session.NewSession(&aws.Config{
 		Region: aws.String(defaultConfig.awsRegion), // Replace with your desired region
 	}))
 
 	msgPoller := processor.NewSqsPoller(awsSession, defaultConfig.queueName, defaultConfig.pollSize)
-	processor.StartProcessor(msgPoller)
-	
-	msgClient := receiver.NewSqsClient(awsSession, defaultConfig.queueName)
+	go processor.StartProcessor(ctx, msgPoller)
+
+	msgClient := receiver.NewSqsQueuer(awsSession, defaultConfig.queueName)
 
 	r := chi.NewRouter()
 	r.Get("/health", health)
@@ -67,7 +68,9 @@ func main() {
 	sig := <-stop
 	fmt.Printf("\nsignal: %s\n", sig)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx.Done() // stops anything listening to our main context, ie the processor
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second) // new context with timeout to control shutdown
 	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {
