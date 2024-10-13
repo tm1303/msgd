@@ -7,6 +7,7 @@ import (
 
 type EnqueueRequest struct {
 	Message string `json:"message"`
+	UserID string `json:"user_id"`
 }
 
 type EnqueueResponse struct {
@@ -14,7 +15,7 @@ type EnqueueResponse struct {
 }
 
 type MsgQueuer interface {
-	Enqueue(messageBody string) (messageID *string, err error)
+	Enqueue(messageBody string, userID string) (messageID *string, err error)
 }
 
 func GetHandler(msgQueuer MsgQueuer) func(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +30,7 @@ func GetHandler(msgQueuer MsgQueuer) func(w http.ResponseWriter, r *http.Request
 			return
 		}
 
-		id, err := msgQueuer.Enqueue(p.Message)
+		id, err := msgQueuer.Enqueue(p.Message, p.UserID)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError) // log
 			return

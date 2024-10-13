@@ -23,11 +23,12 @@ func NewSqsPoller(awsSession *session.Session, queue string, batchSize int64) Ms
 	}
 }
 
-func (r sqsPoller) Poll(ctx context.Context, action func(message *string) bool) int64 {
+func (r sqsPoller) poll(ctx context.Context, action pollerAction, requestAttributes []string) int64 {
 
 	pollParams := &sqs.ReceiveMessageInput{
 		MaxNumberOfMessages: r.batchSize,
 		QueueUrl:            r.queue,
+		MessageAttributeNames: aws.StringSlice(requestAttributes),
 	}
 
 	result, err := r.sqs.ReceiveMessage(pollParams)
@@ -42,7 +43,8 @@ func (r sqsPoller) Poll(ctx context.Context, action func(message *string) bool) 
 	msgCount := int64(0)
 	for _, v := range result.Messages {
 		b := v.Body
-		if action(b) { // if the message has been procssed delete it from the queue
+		a := convertMessageAttributes(v.MessageAttributes)
+		if action(b, a) { // if the message has been processed delete it from the queue
 			deleteParams := &sqs.DeleteMessageInput{
 				QueueUrl:      r.queue,
 				ReceiptHandle: v.ReceiptHandle,
@@ -56,4 +58,21 @@ func (r sqsPoller) Poll(ctx context.Context, action func(message *string) bool) 
 	}
 
 	return int64(msgCount)
+}
+
+func convertMessageAttributes(attrs map[string]*sqs.MessageAttributeValue) map[string]interface{} {
+    result := make(map[string]interface{})
+    for key, attr := range attrs {
+        switch *attr.DataType {
+        case "String":
+            result[key] = *attr.StringValue
+        case "Number":
+            result[key] = *attr.StringValue // SQS represents numbers as strings
+        case "Binary":
+            result[key] = attr.BinaryValue
+        default:
+            result[key] = nil // or handle unknown types
+        }
+    }
+    return result
 }

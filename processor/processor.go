@@ -3,11 +3,14 @@ package processor
 import (
 	"context"
 	"fmt"
+	"msgd/domain"
 	"time"
 )
 
+type pollerAction func(message *string, attributes map[string]interface{}) bool
+
 type MsgPoller interface {
-	Poll(ctx context.Context, processorAction func(Message *string) bool) (count int64)
+	poll(ctx context.Context, processorAction pollerAction, requestAttributes []string) (count int64)
 }
 
 func StartProcessor(ctx context.Context, poller MsgPoller) {
@@ -26,16 +29,24 @@ func StartProcessor(ctx context.Context, poller MsgPoller) {
 }
 
 func pollMessages(ctx context.Context, poller MsgPoller) error {
-	fmt.Println("start messages process")
-	count := poller.Poll(ctx, processMessage)
+	fmt.Println("start message polling")
+	count := poller.poll(ctx, processMessage, []string{domain.UserIDAttributeName})
 	fmt.Printf("%d messages processed\n", count)
 
 	return nil // Return nil for successful processing; add error handling if needed
 }
 
-func processMessage(Message *string) bool {
-	if _, err := fmt.Printf("Message dequeued: %s\n", *Message); err != nil {
-		return false
+func processMessage(body *string, attributes map[string]interface{}) bool {
+	//TODO: do something fun with our message!
+	if body == nil || attributes[domain.UserIDAttributeName] == nil {
+		return false // log
+	}
+	userID, ok := attributes[domain.UserIDAttributeName].(string)
+	if !ok {
+		return false // log
+	}
+	if _, err := fmt.Printf("Message from user `%s` dequeued: %s\n", userID, *body); err != nil {
+		return false // log
 	}
 	return true
 }
