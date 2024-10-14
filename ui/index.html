@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,6 +14,7 @@
             flex-direction: column;
             height: 100vh;
         }
+
         #chat-container {
             flex: 1;
             display: flex;
@@ -22,12 +24,14 @@
             overflow-y: scroll;
             background-color: #f9f9f9;
         }
+
         #chat-input {
             display: flex;
             border-top: 1px solid #ddd;
             padding: 10px;
             background-color: #fff;
         }
+
         #message {
             flex: 1;
             padding: 10px;
@@ -35,6 +39,7 @@
             border: 1px solid #ddd;
             border-radius: 4px;
         }
+
         #send {
             padding: 10px 15px;
             font-size: 14px;
@@ -44,9 +49,11 @@
             cursor: pointer;
             margin-left: 10px;
         }
+
         #send:hover {
             background-color: #0056b3;
         }
+
         .message {
             margin: 5px 0;
             padding: 5px 10px;
@@ -54,12 +61,14 @@
             background-color: #e1f5fe;
             font-size: 14px;
         }
+
         .own-message {
             background-color: #c8e6c9;
             align-self: flex-end;
         }
     </style>
 </head>
+
 <body>
     <div id="chat-container"></div>
 
@@ -90,7 +99,7 @@
         }
 
         // Handle WebSocket messages
-        ws.onmessage = function(event) {
+        ws.onmessage = function (event) {
             const data = JSON.parse(event.data);
             if (data.message) {
                 addMessage(data.message);
@@ -114,7 +123,7 @@
         }
 
         // Send button click event
-        sendButton.addEventListener('click', function() {
+        sendButton.addEventListener('click', function () {
             const message = messageInput.value.trim();
             if (message) {
                 // Display message in the chat
@@ -129,11 +138,12 @@
         });
 
         // Send message when pressing Enter
-        messageInput.addEventListener('keypress', function(event) {
+        messageInput.addEventListener('keypress', function (event) {
             if (event.key === 'Enter') {
                 sendButton.click();
             }
         });
     </script>
 </body>
+
 </html>

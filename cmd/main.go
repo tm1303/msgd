@@ -56,14 +56,13 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
-    r.Use(middleware.Recoverer)
+	r.Use(middleware.Recoverer)
 	r.Use(infra.UserIDMiddleware)
-
-	r.Get("/", ui.ServeHTML)
-
 	r.Get("/health", health)
-	r.Post("/enqueue", receiver.GetHandler(msgClient))
-	r.Get("/ws", broadcaster.WsHandler)
+
+	r.Get("/", ui.ServeHTML)                           // get the UI
+	r.Post("/enqueue", receiver.GetHandler(msgClient)) //send
+	r.Get("/ws", broadcaster.WsHandler)                //receive
 
 	srv := http.Server{
 		Addr:    defaultConfig.httpPort,

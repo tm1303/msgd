@@ -19,7 +19,7 @@ func StartBroadcaster(ctx context.Context, broadcast chan domain.MessageBody) {
 			fmt.Println("Broadcast...")
 
 			json, err := json.Marshal(m)
-			if err!=nil{
+			if err != nil {
 				fmt.Println("Error marshling for broadcast...")
 			}
 			for c := range connections {

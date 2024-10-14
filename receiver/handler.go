@@ -31,7 +31,7 @@ func GetHandler(msgQueuer MsgQueuer) func(w http.ResponseWriter, r *http.Request
 		}
 
 		userID, ok := infra.UserIDFrom(r.Context())
-		if !ok{
+		if !ok {
 			http.Error(w, "missing userid", http.StatusBadRequest)
 			return
 		}
@@ -42,7 +42,7 @@ func GetHandler(msgQueuer MsgQueuer) func(w http.ResponseWriter, r *http.Request
 			return
 		}
 
-		if id==nil{
+		if id == nil {
 			w.WriteHeader(http.StatusInternalServerError) // log
 			return
 		}
