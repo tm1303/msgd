@@ -26,7 +26,9 @@ func StartProcessor(ctx context.Context, poller MsgPoller, broadcastChan chan do
 				[]string{domain.UserIDAttributeName},
 			)
 			fmt.Printf("%d messages processed\n", count)
-			time.Sleep(5 * time.Second)
+			if count == 0 {
+				time.Sleep(5 * time.Second)
+			}
 		}
 	}
 }

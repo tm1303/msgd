@@ -45,7 +45,7 @@ func main() {
 		Region: aws.String(defaultConfig.awsRegion),
 	}))
 
-	broadcastChan := make(chan domain.MessageBody)
+	broadcastChan := make(chan domain.MessageBody, 100)
 	msgPoller := processor.NewSqsPoller(awsSession, defaultConfig.queueName, defaultConfig.pollSize)
 	go broadcaster.StartBroadcaster(ctx, broadcastChan)
 	go processor.StartProcessor(ctx, msgPoller, broadcastChan)
