@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	// "time"
-
 	"github.com/gorilla/websocket"
 )
 
@@ -17,6 +15,7 @@ var upgrader = websocket.Upgrader{
 }
 
 var connections = make(map[*websocket.Conn]bool)
+var keepalive []byte = []byte(`{"keep_alive":true}`)
 
 func WsHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
@@ -39,7 +38,7 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("Shutting down broadcaster...")
 			return
 		default:
-			if err := conn.WriteMessage(websocket.TextMessage, []byte("Waiting...")); err != nil {
+			if err := conn.WriteMessage(websocket.TextMessage, keepalive); err != nil {
 				fmt.Println("error writing message: %w", err)
 				conn.Close()
 				delete(connections, conn)

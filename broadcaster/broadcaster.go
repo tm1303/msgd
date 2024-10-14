@@ -2,6 +2,7 @@ package broadcaster
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"msgd/domain"
 
@@ -16,8 +17,13 @@ func StartBroadcaster(ctx context.Context, broadcast chan domain.MessageBody) {
 			return
 		case m := <-broadcast:
 			fmt.Println("Broadcast...")
+
+			json, err := json.Marshal(m)
+			if err!=nil{
+				fmt.Println("Error marshling for broadcast...")
+			}
 			for c := range connections {
-				if err := c.WriteMessage(websocket.TextMessage, []byte(m.Message)); err != nil {
+				if err := c.WriteMessage(websocket.TextMessage, json); err != nil {
 					fmt.Println("error writing message: %w", err)
 					c.Close()
 					delete(connections, c)

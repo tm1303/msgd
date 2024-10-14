@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+	_ "embed"
 	"fmt"
 	"msgd/broadcaster"
 	"msgd/domain"
 	"msgd/infra"
 	"msgd/processor"
 	"msgd/receiver"
+	"msgd/ui"
 	"net/http"
 	"os"
 	"os/signal"
@@ -54,7 +56,10 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
+    r.Use(middleware.Recoverer)
 	r.Use(infra.UserIDMiddleware)
+
+	r.Get("/", ui.ServeHTML)
 
 	r.Get("/health", health)
 	r.Post("/enqueue", receiver.GetHandler(msgClient))
