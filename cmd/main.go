@@ -61,6 +61,7 @@ func main() {
 	r.Get("/health", health)
 
 	r.Get("/", ui.ServeHTML)                           // get the UI
+	r.Get("/script.js", ui.ServeJS)                    // get the JS
 	r.Post("/enqueue", receiver.GetHandler(msgClient)) //send
 	r.Get("/ws", broadcaster.WsHandler)                //receive
 

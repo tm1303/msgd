@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type pollerAction func(message *string, attributes map[string]interface{}) bool
+type pollerAction func(messageId *string,message *string, attributes map[string]interface{}) bool
 
 type MsgPoller interface {
 	poll(ctx context.Context, processorAction pollerAction, requestAttributes []string) (count int64)
@@ -35,7 +35,7 @@ func StartProcessor(ctx context.Context, poller MsgPoller, broadcastChan chan do
 
 func processMessageToQueue(broadcastChan chan domain.MessageBody) pollerAction {
 
-	return func(body *string, attributes map[string]interface{}) bool {
+	return func(id *string, body *string, attributes map[string]interface{}) bool {
 		//TODO: do something fun with our message!
 		if body == nil || attributes[domain.UserIDAttributeName] == nil {
 			return false // log
@@ -55,6 +55,7 @@ func processMessageToQueue(broadcastChan chan domain.MessageBody) pollerAction {
 			fmt.Printf("failed to unmarshal message body: %s", err)
 			return false
 		}
+		message.ID = *id
 
 		broadcastChan <- message
 		return true

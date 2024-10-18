@@ -15,3 +15,13 @@ func ServeHTML(w http.ResponseWriter, _ *http.Request) {
 		log.Fatal(err)
 	}
 }
+
+//go:embed script.js
+var script []byte
+
+func ServeJS(w http.ResponseWriter, _ *http.Request) {
+	w.Header().Set("Content-Type", "application/javascript")
+	if _, err := w.Write(script); err != nil {
+		log.Fatal(err)
+	}
+}

@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="script.js"></script>
     <title>Basic Chat</title>
     <style>
         body {
@@ -66,6 +67,10 @@
             background-color: #c8e6c9;
             align-self: flex-end;
         }
+
+        .loading{
+            background-color: pink;
+        }
     </style>
 </head>
 
@@ -78,71 +83,7 @@
     </div>
 
     <script>
-        // WebSocket connection to localhost
-        const ws = new WebSocket('ws://localhost:8080/ws');
-
-        // Chat elements
-        const chatContainer = document.getElementById('chat-container');
-        const messageInput = document.getElementById('message');
-        const sendButton = document.getElementById('send');
-
-        // Add a message to the chat
-        function addMessage(text, isOwnMessage = false) {
-            const messageElem = document.createElement('div');
-            messageElem.textContent = text;
-            messageElem.classList.add('message');
-            if (isOwnMessage) {
-                messageElem.classList.add('own-message');
-            }
-            chatContainer.appendChild(messageElem);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
-
-        // Handle WebSocket messages
-        ws.onmessage = function (event) {
-            const data = JSON.parse(event.data);
-            if (data.message) {
-                addMessage(data.message);
-            }
-        };
-
-        // Post a message to the server
-        function postMessage(text) {
-            fetch('http://localhost:8080/enqueue', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-User-ID': "tomuser"
-                },
-                body: JSON.stringify({ message: text })
-            }).then(response => {
-                if (!response.ok) {
-                    console.error('Failed to send message');
-                }
-            });
-        }
-
-        // Send button click event
-        sendButton.addEventListener('click', function () {
-            const message = messageInput.value.trim();
-            if (message) {
-                // Display message in the chat
-                addMessage(message, true);
-
-                // Send message to the server
-                postMessage(message);
-
-                // Clear the input field
-                messageInput.value = '';
-            }
-        });
-
-        // Send message when pressing Enter
-        messageInput.addEventListener('keypress', function (event) {
-            if (event.key === 'Enter') {
-                sendButton.click();
-            }
-        });
+        
     </script>
 </body>
 

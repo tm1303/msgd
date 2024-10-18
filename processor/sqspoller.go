@@ -42,9 +42,10 @@ func (r sqsPoller) poll(ctx context.Context, action pollerAction, requestAttribu
 
 	msgCount := int64(0)
 	for _, v := range result.Messages {
+		id := v.MessageId
 		b := v.Body
 		a := convertMessageAttributes(v.MessageAttributes)
-		if action(b, a) { // if the message has been processed delete it from the queue
+		if action(id, b, a) { // if the message has been processed delete it from the queue
 			deleteParams := &sqs.DeleteMessageInput{
 				QueueUrl:      r.queue,
 				ReceiptHandle: v.ReceiptHandle,
